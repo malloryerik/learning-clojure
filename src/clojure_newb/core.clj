@@ -1,4 +1,4 @@
-(ns clojure-newb.core
+ (ns clojure-newb.core
   (:gen-class))
 
 (use 'clojure-newb.core :reload) ; reload the repl
@@ -616,7 +616,7 @@
       (first clect)
       ;; else
       (recur (inc cnt) (rest clect)))))
-()
+
 
 ;; 4clojure #156: Write a function which takes a default value and a sequence of keys and constructs a map.
 
@@ -658,7 +658,7 @@
 ;;     nvec
 ;;     (recur (conj (first coll) nvec))))
 
-
+;; Basic loop
 (defn testmeonce [coll]
   (loop [nvec [] clect coll]
     (if (empty? clect)
@@ -667,4 +667,148 @@
         (println "clect is: " (into [] clect) ". nvec is: " nvec)
         (recur (conj nvec (first clect)) (rest clect))))))
 
-;; 
+ 
+;; 4clojure #156
+;; Write a function which takes a default value and a sequence of keys and constructs a map.
+;; (= (__ 0 [:a :b :c]) {:a 0 :b 0 :c 0})
+
+;; (= (__ "x" [1 2 3]) {1 "x" 2 "x" 3 "x"})
+
+;; (= (__ [:a :b] [:foo :bar]) {:foo [:a :b] :bar [:a :b]})
+
+;; I'm *not* trying to do this the easy way, or using a built-in function.
+;; Instead, let's get loop / recur down straight. That seems much more important.
+
+(defn fc156 [vlyu coll]
+  (loop [v vlyu , clect coll , nmap {}]
+    (if (empty? clect)
+        (do
+          (println v)
+          (println clect))
+        (do
+          (println clect)
+          (recur (v) (assoc nmap (first clect) v) (nmap) )))))
+
+;; this works
+(defn fc156t [vlyu coll]
+  (assoc {} (first coll) vlyu))
+;; (fc156t 0 [ 1 2 3])
+;; => {1 0}
+
+(defn fc156t2 [vlyu coll]
+  (let [nmap {}]
+    (assoc nmap (first coll) vlyu)))
+;; (fc156t2 0 [ :a 2 3])
+;; => {:a 0}
+
+;; not tested or ready
+;; (defn fc156t3 [vlyu coll]
+;;   (loop [nmap {} v vlyu clect coll]
+;;     (assoc nmap (first clect) v) (rest clect) ))
+
+;; now let's test the recursion part
+(defn fc156t4 [vlyu coll]
+  (loop [nvec [] clect coll]           ; clect starts as coll, our arg
+    (if (empty? clect)
+      (println "This is " nvec)
+      (recur (conj nvec (first clect))
+             (rest clect)))))
+
+
+;; and now we can combine both the map part and the recursion part
+;; there are problably
+
+(defn fc156t5 [vlyu coll]
+  (loop [nmap {} clect coll]           ; clect starts as coll, our arg
+    (if (empty? clect)
+      nmap ; final return 
+      (recur (assoc nmap (first clect) vlyu)
+             (rest clect))))) ;  both args in the recur
+
+;; The concise way to do this is to use zipmap and repeat.
+(defn zipmymap [kys vls] ; kys -> keys, vls -> values
+  (zipmap kys vls))
+
+;; Anonymous version
+#(zipmap % (repeat %2))
+;; You'd call it like this:
+(#(zipmap % (repeat %2)) [:a :b :c] [1 2 3])
+;; => {:c [1 2 3], :b [1 2 3], :a [1 2 3]}
+
+;; for the 4clojure question you have to reverse the args, but that's about it.
+
+
+
+
+(defn fc156fast [value coll]
+  (zipmap coll (repeat value)))
+
+
+(def stickymap {:sticks "awesome"})
+
+
+;; ---------------------
+;; From clojuredocs.org:
+;; if-let 
+(defn sum-even [nums]
+  (if-let [nums (seq (filter even? nums))]
+    (reduce + nums)
+    "No evens found."))
+
+;; Let's try to change the arg name in the let
+;;Both work! if-let can use the original arg name for its new arg.
+
+
+
+(defn sum-even-nuhms [nums]
+  (if-let [nuhms (seq (filter even? nums))]
+    (reduce + nuhms)
+    "No evens found."))
+
+;; What if we take away the (seq )... is it really necessary?
+(defn sum-even-2 [nums]
+  (if-let [nums (filter even? nums)]
+    (reduce + nums)
+    "No evens found."))
+;; (sum-even-2 [1 2 3 4])
+;; => 6
+;; (sum-even-2 [ 1 3 5 7])
+;; => 0
+;; Why exactly?
+
+
+;; -----------------------
+;; 4CLOJURE #22  ;
+;; (yes, it comes after #152)
+
+;; Write a function which returns the total number of elements in a sequence.
+;; (= (__ '(1 2 3 3 1)) 5)
+;; (= (__ "Hello World") 11)
+;; (= (__ [[1 2] [3 4] [5 6]]) 3)
+;; (= (__ '(13)) 1)
+;; restriction: count
+
+;; First thoughts.
+;; Use loop / recurs again? If so, could "drop" or "pop," couting loops until empty. That's a simple way. Let's do it, and het more loop / recur practice.
+;; I'm wondering, however, what exactly is an "element"?
+
+
+(defn fc22 [sequins]
+  (loop [cnt 0, sqns sequins]
+    (if (empty? sqns)
+      cnt
+      ;else
+      (recur (inc cnt) (pop (vec sqns))))))
+
+;; This works fine for numbers and so on, but not for strings!
+;; pop takes the removes the first element of a sequence.
+
+(defn fc22a [sea-quince]
+  (loop [cnt 0, sequins sea-quince]
+    (if (empty? sequins)
+      cnt
+      ;else
+      (recur (inc cnt) (pop (vec sequins))))))
+
+;; There we go, that passes.
+
