@@ -807,8 +807,28 @@
   (loop [cnt 0, sequins sea-quince]
     (if (empty? sequins)
       cnt
-      ;else
       (recur (inc cnt) (pop (vec sequins))))))
 
 ;; There we go, that passes.
+;; again, there are interesting short ways of doing this.
+
+
+;; 4clojure 24
+;; Write a function which returns the sum of a sequence of numbers.
+;; (= (__ [1 2 3]) 6)
+
+;; (= (__ #{4 2 1}) 7)
+
+;; Seems pretty straight forward.
+
+(defn sumseq [sq]
+  (reduce + sq))
+
+;; anonymous version
+#( reduce + %)
+
+;; another was simply
+apply +
+
+;; I still don't fully underestand apply. I've need to.
 
