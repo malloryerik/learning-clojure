@@ -832,3 +832,36 @@ apply +
 
 ;; I still don't fully underestand apply. I've need to.
 
+
+;; ------------
+
+;; 4Clojure #23 Reverse a Sequence
+;; Write a function which reverses a sequence.
+;; can't use "reverse" or "rseq".
+ 
+;; (= (__ [1 2 3 4 5]) [5 4 3 2 1])
+;; (= (__ (sorted-set 5 7 2 7)) '(7 5 2))
+;; (= (__ [[1 2][3 4][5 6]]) [[5 6][3 4][1 2]])
+
+;; For this one, empty might work.
+;; Oddly, though, the second example they use gives us a sorted-set, but requires a list '().
+;; (empty) returns a set #{}, so maybe this won't work here?
+
+(defn esrever [sq]
+  (loop [nsq (empty sq), sqn (vec sq)]
+    (if (empty? sqn)
+      nsq
+      (recur (conj nsq (peek sqn)) (vec (drop-last sqn)) ))))
+
+;; As predicted, this works for all but the "sorted-set" question.
+
+;; This case highlights the importance of knowing one's data structures.
+;; I heard osmeone say that if you know the data types well, the right algorithm comes naturally. I didn't really understand wht they meant, though it sounded nice, but here is an example, I think. Though "algorithm" is a bit much here...
+
+;; Simply:
+into () %
+
+
+
+
+
