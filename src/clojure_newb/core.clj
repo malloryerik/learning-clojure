@@ -833,9 +833,9 @@ apply +
 ;; I still don't fully underestand apply. I've need to.
 
 
-;; ------------
-
-;; 4Clojure #23 Reverse a Sequence
+;; ----------------------------------
+;; 4Clojure #23 Reverse a Sequence --
+;;-----------------------------------
 ;; Write a function which reverses a sequence.
 ;; can't use "reverse" or "rseq".
  
@@ -859,8 +859,247 @@ apply +
 ;; I heard osmeone say that if you know the data types well, the right algorithm comes naturally. I didn't really understand wht they meant, though it sounded nice, but here is an example, I think. Though "algorithm" is a bit much here...
 
 ;; Simply:
-into () %
+(defn esrever-a [coll]
+  into () coll)
+;; and anonymously
+#(into () %)
 
+;; Wow! This is because conj(oining) to a list happens at the beginning.
+;; I'd read this, but it hadn't sunk in well enough. In fact, I only saw it as a problem, because up to now vectors have been my datatype of choice.
+;; The other thing to realize: *Sequence* datatypes (vectors, lists) are compared for equality by elements. So
+ (= '(1 2 3) [1 2 3])
+;; => true
+
+;; __________________________________
+;;   4CLOJURE #27 check palindrome
+;; __________________________________
+;; (false? (__ '(1 2 3 4 5)))
+;; (true? (__ "racecar"))
+;; (true? (__ [:foo :bar :foo]))
+;; (true? (__ '(1 1 3 3 1 1)))
+;; (true? (__ '(1 1 3 3 1 1)))
+;; __________________________________
+
+;; a few ideas - check the first half against the second,
+;; might be messy, like requires a 
+;; let's try a loop, to make it easy for now
+
+(defn elle [sq]
+  (let [sqr sq]
+    (if (string? sqr)
+      (= (apply str (into () sqr)) sq)
+      (= (reverse sqr) sq))))
+
+;; OK, so I took the cheap route, doing a type check. But hey, I've never done one before...
+
+;; The missing ingredient was "seq".
+;; The problem with reverse is that it does this:
+;; (reverse "nice")
+;; => (\e \c \i \n)
+;; So we just need to check against the first-order string in a way that will escape the characters as well. And this means turning it into a seq.
+
+;; (seq "nice")
+;; => (\n \i \c \e)
+
+;; Then we check those against each other.
+(defn palin [sq]
+  (= (reverse sq) (seq sq)))
+
+;; that's is. faster:
+#(= (reverse %) (seq %))
+
+;; pretty amazing brevity. Another lesson in 
+
+
+;; _______________________
+;; 4Clojure 26  FIBONACCI
+;; _______________________
+
+;; Write a function which returns the first x fibonacci numbers
+
+;; (= (__ 8) '(1 1 2 3 5 8 13 21))
+
+;; There's probably an extraordinarily terse way to do this.
+;; But let's try a loop / recur?
+
+(def n1 '(1) )
+
+;; (defn fib1 [x]
+;;   (let [f []]
+;;     (loop [cnt x, n 1]  ; cnt is x because we'll decrement to 0
+;;       (if (= cnt 0)
+;;         f
+;;         (recur (dec cnt)
+;;                (conj f (+ n (- n 1)))))))) 
+
+;; (defn ftest [x]
+;;   (let [n x, m (- n 1), f []]
+;;     (if (< n 2)
+;;       n
+;;       )))
+
+(defn halver [x]
+  (let [ r []]
+    (loop [n x]
+      (if (< n 2)
+        r
+        (do
+          (conj r n)
+          (recur (/ n 2) ))))))
+
+(defn ttt [x]
+  (loop [n x, v [1], cnt x]
+     (when (> cnt 1)
+       (println "hi")
+       (println v)
+       (recur (+ n (- n 1)) (conj v n) (dec cnt)))))
+
+
+(defn ccc [x]
+  (let [v []]
+    (conj [] (/ x 2))))
+
+;; not like a fib, but some mechanics.
+(defn fibbit [x]
+  (loop [fsq '(), n x]
+    (when (> n -1)
+      (println "fsq is: " fsq ", and n is " n)
+      (recur (conj fsq (+ n (- n 1)))
+             (- n 1)))))
+
+;; I had a terrible time of things, because I didn't understand that loop args and recur args have to be inthe same order. That's to say that you state you arguments in the same order that you recur on them. Or else.
+
+
+(defn poornocci [x]
+  (loop [cnt 1,
+         res [1],
+         a 1
+         b 0]
+    (if (= cnt x)
+      res
+      (recur (inc cnt)
+             (conj res (+ a b))
+             (+ a b)
+             (nth res (- cnt 1))))))
+
+;; This is probably a terrible way to do a fib, although it works and takes adv of tail call optimization.
+;; Already I can get rid of "b".
+
+; (require '[clojure.string :as str])
+
+(def fishy "one fish two      fish red   fish blue fish 발간 생선")
+
+;; get this: {"one" 1, "fish" 4, "two" 1, "red" 1, "blue" 1}
+
+;
+;; (defn count-words [st]
+;;   (let [res (str/split st #" ")]
+;;     (frequencies res)))
+
+;;#([let [res (str/split % #"/s+")]])
+
+
+;; ____________________________
+;; 4Clojure 38 Maximum Value
+;; ----------------------------
+;; Write a function which takes a variable number of parameters and returns the maximum value.
+;; RESTRICTIONS: max, max-key
+;; (= (__ 1 8 3 4) 8)
+;; (= (__ 45 67 11) 67)
+
+;; (defn maxval [values]
+;;   (loop [head (first values) body (rest values)]
+;;     (println "Head: " head ", Body: " body)
+;;     (recur (first body) (rest body))))
+
+;; (defn more-testing [coll]
+;;   (let [head (first coll), body (rest coll)]
+;;     (println head " + " body)
+;;     (cons head body)))
+
+
+;; (defn maxi-v [coll]
+;;   (loop [head (first coll), body (rest coll)]
+;;     (println head " & " body)))  
+
+
+(defn maxmyvals [x & more]
+  "Accepts variable number of numerical params and returns their maximum value."
+  ;(println "x: " x ", & more: " more)
+  (if (>= x (first more))
+    x
+    (first more)))
+
+
+(defn maxem [n & nums]
+  "integers as parameters"
+  (loop [head n, body nums]
+    (if (true? (> head (first body)))
+      head
+      (first body))))
+
+#(true? (<= % %2) 321 123)
+
+
+
+(defn maxout [x & more]
+  (reduce  #(if (>= %1 %2 ) %1 %2) x more ))
+
+;; (defn recurif? [vctr]
+;;   (loop [v vctr]
+;;     (if (= (first v) 6)
+;;       v
+;;; 
+;; recur (rest v))))
+
+
+;; or in a control statement
+(defn ifor [vctr]
+  (if (or (> (first vctr) 4) (= (first vctr) 234))
+    (do (println "yup") 
+        (first vctr))
+    (do (println "tiny beginning")
+        "hiya")))
+
+
+;; multiple ifs?)
+
+;; (defn ifif [a-string]
+;;   (cond
+;;     (= a-string "yes") "Cool, Baby"
+;;     (= a-string "no") "Oh well, catch you next time."
+;;     (= a-string "maybe") "Hmm, well I'll be checking my messages."
+;;     :else "Not sure what you mean by that..."))
+
+
+
+;; ---------------------------
+;; PARTIAL, MAP, REDUCE
+;; ---------------------------
+
+;; ((partial * 3) 5)
+;; => 15
+
+;; (map (partial * 3) [3 4 5])
+;; (9 12 15)
+
+;; (reduce (partial * 3) [3 4 5])
+;; => 540 ... 540??
+
+
+;; (reduce (partial + 2) [ 2 3 4 ])
+
+;; (+ 4 (+ 3 (+ 2 2)))
+
+;; These two are the same:
+
+;; (#(if (> %1 %2) %1 %2) 4 5 )
+
+;; ((fn [x y] (if (> x y) x y )) 4 5)
+
+(defn maxme [n & more]
+  "Takes any amount of numerical args, returns the greatest."
+  (reduce #(if (> %1 %2) %1 %2) n more))
 
 
 
