@@ -1103,4 +1103,81 @@ apply +
 
 
 
+;; there are other very good solutions, like:
+;; #(last (sort %&))
+;;
+
+(defn returnem [x & y]
+  (apply #(sort %&) x y))
+
+
+;; OK so you can make a variadic arg like this.
+(defn maxmax [ & y]
+  (apply max y))
+
+(defn addem [& x]
+  (reduce + x))
+
+
+(defn askit []
+  (let [inputme (read-line)]
+    inputme))
+
+(defn print-message [pid pw] 
+(println "PID : " pid)
+ (println "PW : " pw))
+
+(defn inp[]
+  (println "Enter your PID ") 
+  (let[pid (read-line)]
+    (println "Enter your password")
+    (let [pw (read-line)]
+      (print-message pid pw))))
+
+
+(defn allcaps [s]
+  (apply str (re-seq #"[A-Z]" s)))
+
+#(apply str (re-seq #"[A-Z]" %&))
+
+
+;; _________________________
+;; 4CLOJURE 32
+;; Write a function which duplicates each element of a sequence.
+;; _________________________
+;; (= (__ [1 2 3]) '(1 1 2 2 3 3))
+;; (= (__ [[1 2] [3 4]]) '([1 2] [1 2] [3 4] [3 4]))
+
+;; (defn rptr [x]
+;;   x)
+
+(#(interleave % %) [1 2 3])
+;; => (1 1 2 2 3 3)
+;; pretty nice. Seems like if you get good with these built-in functions, this language must be amazing.
+
+
+ (filter #(= 0 (mod % 10)) (range 100))
+;; (0 10 20 30 40 50 60 70 80 90)
+ (filter #(= 3 (mod % 10)) (range 100))
+;; (3 13 23 33 43 53 63 73 83 93)
+ (filter #(= 3 (mod % 11)) (range 100))
+;; (3 14 25 36 47 58 69 80 91)
+;;  (filter #(= 0 (mod % 11)) (range 100))
+;; (0 11 22 33 44 55 66 77 88 99)
+ 
+(defn ranmod [r] (map #(mod % 10) (range r)))
+ ;; (0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9)
+
+
+ ;; ______________________________
+ ;; 4CLOJURE 34
+ ;; Write a function which creates a list of all integers in a given range.
+ ;; RESTRICTED: range
+ ;; ______________________________
+
+
+(#(take (- %2 %1) (iterate inc %1)))
+
+(defn implement-range [lo hi] (take (- hi lo) (iterate inc lo)))
+
 
