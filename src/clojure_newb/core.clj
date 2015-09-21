@@ -1138,7 +1138,7 @@ apply +
 (defn allcaps [s]
   (apply str (re-seq #"[A-Z]" s)))
 
-#(apply str (re-seq #"[A-Z]" %&))
+ #(apply str (re-seq #"[A-Z]" %&))
 
 
 ;; _________________________
@@ -1148,26 +1148,25 @@ apply +
 ;; (= (__ [1 2 3]) '(1 1 2 2 3 3))
 ;; (= (__ [[1 2] [3 4]]) '([1 2] [1 2] [3 4] [3 4]))
 
-;; (defn rptr [x]
-;;   x)
 
-(#(interleave % %) [1 2 3])
+ (#(interleave % %) [1 2 3])
 ;; => (1 1 2 2 3 3)
 ;; pretty nice. Seems like if you get good with these built-in functions, this language must be amazing.
 
 
- (filter #(= 0 (mod % 10)) (range 100))
+  (filter #(= 0 (mod % 10)) (range 100))
 ;; (0 10 20 30 40 50 60 70 80 90)
+
  (filter #(= 3 (mod % 10)) (range 100))
 ;; (3 13 23 33 43 53 63 73 83 93)
- (filter #(= 3 (mod % 11)) (range 100))
-;; (3 14 25 36 47 58 69 80 91)
-;;  (filter #(= 0 (mod % 11)) (range 100))
-;; (0 11 22 33 44 55 66 77 88 99)
- 
-(defn ranmod [r] (map #(mod % 10) (range r)))
- ;; (0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9)
 
+  (filter #(= 3 (mod % 11)) (range 100))
+;; (3 14 25 36 47 58 69 80 91)
+  (filter #(= 0 (mod % 11)) (range 100))
+;; (0 11 22 33 44 55 66 77 88 99)
+
+ (map #(mod % 2) (range 100))
+;; (0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1)
 
  ;; ______________________________
  ;; 4CLOJURE 34
@@ -1176,8 +1175,11 @@ apply +
  ;; ______________________________
 
 
-(#(take (- %2 %1) (iterate inc %1)))
+;;; 
+;;; 
+(#(take (- %2 %1) (iterate inc %1)) 3 7)
 
-(defn implement-range [lo hi] (take (- hi lo) (iterate inc lo)))
+ (defn implement-range [lo hi] (take (- hi lo) (iterate inc lo)))
+
 
 
