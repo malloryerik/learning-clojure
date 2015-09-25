@@ -1082,7 +1082,7 @@ apply +
 
 ;; (map (partial * 3) [3 4 5])
 ;; (9 12 15)
-
+(reduce #(cons %2 %1) [1 2 3] [4 5 6])
 ;; (reduce (partial * 3) [3 4 5])
 ;; => 540 ... 540??
 
@@ -1100,6 +1100,8 @@ apply +
 (defn maxme [n & more]
   "Takes any amount of numerical args, returns the greatest."
   (reduce #(if (> %1 %2) %1 %2) n more))
+
+"Returns the greatest of any amount of arguments."
 
 
 
@@ -1138,7 +1140,7 @@ apply +
 (defn allcaps [s]
   (apply str (re-seq #"[A-Z]" s)))
 
- #(apply str (re-seq #"[A-Z]" %&))
+ #(apply str (re-seq #"[a-zA-Z0-9]" %&)) ;; alphanumeric
 
 
 ;; _________________________
@@ -1173,13 +1175,66 @@ apply +
  ;; Write a function which creates a list of all integers in a given range.
  ;; RESTRICTED: range
  ;; ______________________________
-
-
-;;; 
 ;;; 
 (#(take (- %2 %1) (iterate inc %1)) 3 7)
 
- (defn implement-range [lo hi] (take (- hi lo) (iterate inc lo)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -------------------------------------
+;; 4CLOJURE 28 -- FLATTEN A SEQUENCE
+;; Write a function which flattens a sequence.
+;; RESTRICTIONS: flatten
+;; -------------------------------------
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+; '((1 2) 3 [4 [5 6]])
+; '((((:a)))))
+
+;; (reduce '((((:a)))))
+;; (into '() '((1 2) 3 [4 [56]]))
+
+;; (into '() '([4 [56]] 3 (1 2)))
+
+;; (reduce into '[] '((1 2) 3 [4 [56]]))
+
+;; (defn flatso [coll]
+;;   coll)
+
+;; one way, break into a string and do regex.
+;; but that's a messy hack, I think.
+;; should be a better way...
+;; probably with proper use of <apply>
+
+
+;;;;;;;;;; let's look at the source
+;; https://github.com/clojure/clojure/blob/clojure-1.7.0/src/clj/clojure/core.clj#L6843
+
+(defn flattenC
+  "Takes any nested combination of sequential things (lists, vectors,
+  etc.) and returns their contents as a single, flat sequence.
+  (flatten nil) returns an empty sequence."
+  {:added "1.2"
+   :static true}
+  [x]
+  (filter (complement sequential?)
+          (rest (tree-seq sequential? seq x)))) 
+
+;; (defn group-by 
+;;   "Returns a map of the elements of coll keyed by the result of
+;;   f on each element. The value at each key will be a vector of the
+;;   corresponding elements, in the order they appeared in coll."
+;;   {:added "1.2"
+;;    :static true}
+;;   [f coll]  
+;;   (persistent!
+;;    (reduce
+;;     (fn [ret x]
+;;       (let [k (f x)]
+;;         (assoc! ret k (conj (get ret k []) x))))
+;;     (transient {}) coll)))
+
 
 
 
