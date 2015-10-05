@@ -5,6 +5,8 @@
 
 (def bbd 90)
 
+
+
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
@@ -13,9 +15,10 @@
 (def mydocs
   {:nrepl (def nrepl
             {:refresh "(use 'clojure-newb.core :reload)"
-             :emacs-kbd-macro "C-( to open, then C-) to close"
+             :emacs-kbd-macro "C-x ( to open, then C-x ) to close"
              :start-nrepl "M-x cider-jack-in"
              :quit-nrepl "nrepl-close"
+             :get-function-source "clojure-newb.core> (clojure.repl/source <function name>)"
              })
 
    :vect1 (def vect1 (vector "hi" "there" "you"))
@@ -1237,4 +1240,357 @@ apply +
 
 
 
+;;;;;;;;;;;;;;;;;;;;
 
+;;   "Returns a map of the elements of coll keyed by the result of
+;;   f on each element. The value at each key will be a vector of the
+;;   corresponding elements, in the order they appeared in coll."
+;;   {:added "1.2"
+;;    :static true}
+;;   [f coll]  
+;;   (persistent!
+;;    (reduce
+;;     (fn [ret x]
+;;       (let [k (f x)]
+;;         (assoc! ret k (conj (get ret k []) x))))
+;;     (transient {}) coll)))
+
+
+
+;;;;;;;;;;;;;;;;;;;;
+
+;;   "Returns a map of the elements of coll keyed by the result of
+;;   f on each element. The value at each key will be a vector of the
+;;   corresponding elements, in the order they appeared in coll."
+;;   {:added "1.2"
+;;    :static true}
+;;   [f coll]  
+;;   (persistent!
+;;    (reduce
+;;     (fn [ret x]
+;;       (let [k (f x)]
+;;         (assoc! ret k (conj (get ret k []) x))))
+;;     (transient {}) coll)))
+
+
+
+;;;;;;;;;;;;;;;;;;;;
+;; Interleave Two Seqs  ** RESTRICTED: interleave **
+;; Write a function which takes two sequences and returns the first item from each, then the second item from each, then the third, etc.
+
+;; (= (__ [1 2 3] [:a :b :c]) '(1 :a 2 :b 3 :c))
+
+;; (= (__ [1 2] [3 4 5 6]) '(1 3 2 4))
+
+;; (= (__ [1 2 3 4] [5]) [1 5])
+
+;; (= (__ [30 20] [25 15]) [30 25 20 15])
+
+#(flatten (map vector %1 %2))
+
+;;; But looking at the other solutions I found:
+
+;; mapcat list
+
+;; and found that simply
+
+;; mapcat vector
+;; also works
+
+;; The silly thing is that I had tried mapcat, but incorrectly, because I'm still making mistakes with the number of arguments, which functions take what, and some basic syntax.
+
+
+;; FACTORIAL
+(defn infact [n]
+
+  (take n (iterate (partial + (dec n)) (dec (dec n)))))
+
+;;
+
+;; 5 + 4 + 3 + 2 + 1
+
+(#(reduce * (take % (iterate inc 1))) 5)
+(#(reduce * (range 1 (+ % 1))) 5)
+
+;; better?(
+(#(reduce * (range 1 (inc %))) 5)
+
+(defn factme [n]
+  "Returns factorial of n, using bigint."
+  (reduce * (range 1N (inc n))))
+
+(def leroy "leeeeerrrroooy")
+
+;; The first thing to know here is that we can turn a string into an opened-up vecor with <vec>.
+
+(def vroy (vec leroy))
+(def sroy (seq leroy))
+
+;; One idea -- use <contains?> ... but might be slow... still will get the job done...
+
+;; <distinct> looks good...
+
+; (= (first vroy) (nth vroy 2)) ;
+
+
+;; (defn unrepeatable [coll]
+;;   (loop [vroy (vec coll) unrepeated []]
+;;     (when (not (empty? vroy))
+;;       (if (not= (first vroy) (second vroy))
+;;         (recur (conj (first vroy) unrepeated))))))
+
+
+(filter (fn [x]
+          (= 1))
+        [1 1 2 3 3 4 5 5 3])
+ 
+
+
+
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;  4CLOJURE 33
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Write a function which replicates each element of a sequence a variable number of times.
+
+;; (= (__ [1 2 3] 2) '(1 1 2 2 3 3))
+
+;; (= (__ [:a :b] 4) '(:a :a :a :a :b :b :b :b))
+
+;; (= (__ [4 5 6] 1) '(4 5 6))
+
+;; (= (__ [[1 2] [3 4]] 2) '([1 2] [1 2] [3 4] [3 4]))
+
+;; (= (__ [44 33] 2) [44 44 33 33])
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; after playing around a little with repeat, I tried interleave and got this solution:
+(#(if (= %2 1 )
+     %1
+     (apply interleave (take %2 (repeat (seq %1))))) [1 2 3] 2)
+
+;;It fails! When there is only 1 replicate, there's nothing to interleave... Actually, I'm not sure that that isn't a bug...
+
+(defn repeatr [s c]
+  (mapcat #(repeat c %) s))
+
+;; Just looked, and there are secret test cases! 
+
+;; There are also map, mapcat, concat, cycle, iterate, that seem like they could help in this problem.
+
+
+(defn rree [s n] (mapcat #(repeat n %) s))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; $CLOJURE 40 -- Implement interpose
+;; Restricted: interpose
+;; Write a function which separates the items of a sequence by an arbitrary value.
+;; (= (__ 0 [1 2 3]) [1 0 2 0 3])
+;; (= (apply str (__ ", " ["one" "two" "three"])) "one, two, three")
+;; (= (__ :z [:a :b :c :d]) [:a :z :b :z :c :z :d])
+;; (= (__ :z [:a :b :c :d]) [:a :z :b :z :c :z :d])
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+;; First try:
+(#(interleave %2 (repeat (dec (count %2)) %1)) :z [:a :b :c :d]) 
+;; (:a :z :b :z :c :z :d :z)
+;; Problemo: an extra :z was added to the end. I simply hadn't thought it through well enough...
+;; Simple hack, lop off the last, and get rid of the dec.
+
+;; For that there's "drop-last"! Or, if we were sure we'd be using a vector, we could have used "pop".
+(#(drop-last (interleave %2 (repeat (count %2) %1))) :z [:a :b :c :d]) 
+
+;; That does it! But it seems messy.
+;; turns out we don't need the "count".
+#(drop-last (interleave (repeat %2) %1))
+;; Also, it might be slightly more intuitive to say
+#(rest (interleave (repeat %) %2))
+;; which simply starts with the repeated arg, slicing it off of the front with "rest".
+
+
+(defn dropnth [coll step]
+  (keep-indexed #(if-not (zero? (rem coll 4)) coll )))
+
+(keep-indexed #(if-not (zero? (rem %1 4)) %2) [:a :b :c :d :e :f :g :h :j])
+
+;; (defn keeptrying [coll]
+;;   (keep-indexed #(if odd? %) %)) 
+
+(defn drop41 [sqnc n]
+  (loop [i 1, s sqnc, res []]
+    (if (empty? s)
+      res
+      (recur (inc i) ; increment counter
+             (rest s) ; take rest of s, do this first so we skip the first 
+             (if (zero? (rem i n)) res (conj res (first s)))))))
+
+(defn dropdex [sqnc, num]
+  (keep-indexed #(not (zero? (rem %1 %2))) sqnc num))
+
+
+
+(defn trytoconj [a b]
+  (conj a b ))
+
+;; (mapcat (partial take 3) [[1 2 3 4 5] [ 6 7 8] [3 4 ]])
+
+;; (mapcat (partial take 2) (partition-all 3 [1 2 3 4 5  6 7 8 3 4 ]))
+
+(defn dropart [sqns n]
+  (mapcat (partial take (dec n)) (partition-all n sqns)))
+
+;; anonymous function version
+(#(mapcat (partial take (dec %2)) (partition-all %2 %1)) [1 2 3 4 5 6 7 8] 3)
+
+;; Id been trying to use "keep-indexed" but couldn't get the syntax right.
+;; Here's a succesful implementation:
+(fn [coll n]
+  (keep-indexed #(if (not= (mod (inc %1) n) 0) %2) coll))
+;; I guess the trick was to return 0, but I'm still iffy about the two args.
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 4clojure 49
+;;; Split a sequence 
+;; Difficulty:	Easy
+;; Topics:	seqs core-functions
+;; Write a function which will split a sequence into two parts.
+;;
+;; (= (__ 3 [1 2 3 4 5 6]) [[1 2 3] [4 5 6]])
+;;
+;; (= (__ 1 [:a :b :c :d]) [[:a] [:b :c :d]])
+;;
+;; (= (__ 2 [[1 2] [3 4] [5 6]]) [[[1 2] [3 4]] [[5 6]]])
+;; Special Restrictions
+;; split-at
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;method 1
+;; partition
+;; rejoin (concat or flatten) the rest of the new vector
+
+(#(vector (first (partition-all %1 %2)) (apply concat (rest (partition-all %1 %2)))) 3 [[1 2] [3 4] [5 6] [ 7 8] [9 10]])
+
+;; This works, but it's way more work, or longer, than need be.
+
+(#(juxt take drop %1 %2) 3 [[1 2] [3 4] [5 6] [ 7 8] [9 10]]) 
+;; this is all hat was needed...
+((juxt take drop) 2 [1 2 3 4 5 6])
+
+(drop 2 [1 2 3 4 5])
+;;=> (3 4 5)
+
+(take 2 [1 2 3 4 5])
+;;=> (1 2)
+
+;; ;; (juxt)
+;; ;; http://daveyarwood.github.io/2014/07/30/20-cool-clojure-functions/
+;; ;; juxt takes two or more functions and returns a function that returns a vector containing the results of applying each function on its arguments. In other words, ((juxt a b c) x) => [(a x) (b x) (c x)]. This is useful whenever you want to represent the results of using 2 different functions on the same argument(s), all at once rather than separately:
+
+(def inc-and-double
+  (juxt inc #(* % 2)))
+
+(inc-and-double 5)
+;; ;; ;=> [6 10]
+;; ;; This function is especially powerful when dealing with multimethods, as it provides a concise way to dispatch on multiple parameters:
+
+(defmulti guess-fruit (juxt :color :size))
+
+(defmethod guess-fruit [:red :small]
+  [fruit]
+  "cherry")
+
+(defmethod guess-fruit [:green :large]
+  [fruit]
+  "watermelon")
+
+
+
+;; Advanced Destructuring
+ 
+;; Difficulty:	Easy
+;; Topics:	destructuring
+
+
+;; Here is an example of some more sophisticated destructuring.
+;; test not run	
+
+;; (= [1 2 [3 4 5] [1 2 3 4 5]] (let [[a b & c :as d] __] [a b c d]))
+;; answer is [1 2 3 4 5] or (range 1 6)
+
+(#(cond
+    (every? true? %&) false
+    (every? false? %&) false
+    :else true) [true true false])
+
+;; This was my first idea, but I learned that I should have searched through the documentation, because there is an amazing and simple answer here.
+
+
+
+;; That's it.
+;; However, it's not quite in the spirit of the excercise I think, because what if we'd  used expressions that evaluate to true or false, and not just the booleans themselves.
+
+;; My answer was the most straightforward and very easy to read.
+;; But it's also one of the least sophisticated.
+;;
+(fn [& x]
+(and (not-every? true? x) (not-every? false? x)))
+
+
+
+
+
+;; Here's a pretty nice one by Ming. I don't quite grok it yet.
+#(= #{true false} (set %&))
+
+
+
+(defn hiyou [name]
+  (println "안녕," name))
+
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 4CLOJURE 61 -- Map Construction (Restricted: ZIPMAP) 
+;; Difficulty:	Easy
+;; Topics:	core-functions
+;; Write a function which takes a vector of keys and a vector of values and constructs a map from them.
+;; (= (__ [:a :b :c] [1 2 3]) {:a 1, :b 2, :c 3})
+;; (= (__ [1 2 3 4] ["one" "two" "three"]) {1 "one", 2 "two", 3 "three"})
+;; (= (__ [:foo :bar] ["foo" "bar" "baz"]) {:foo "foo", :bar "bar"})
+;; Special Restrictions
+;; zipmap
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; (defn toMap [c1 c2]
+;;   (apply hash-map (interleave c1 c2)))
+
+
+
+
+
+(defn zipmapFromCore
+  "Returns a map with the keys mapped to the corresponding vals."
+  {:added "1.0"
+   :static true}
+  [keys vals]
+    (loop [map {}
+           ks (seq keys)
+           vs (seq vals)]
+      (if (and ks vs)
+        (recur (assoc map (first ks) (first vs))
+               (next ks)
+               (next vs))
+        map)))
+ 
+(defn gcdiv [n1 n2]
+  (if (> n1 n2)
+    (let [nbig n1
+          nsml n2]
+      (rem nbig nsml))
+    (let [nbig n2
+          nsml n1]
+       (rem nbig nsml) )))
+;; 4CLOJURE 66 Greatest Common Devisor
