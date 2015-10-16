@@ -1731,5 +1731,8 @@ apply +
 
 ( (fn [a b] map #(Integer/parseInt %) (map str (str (* %1 %2)))) 9 99)
 
-((fn [a b]  (* a b))
+((fn [a b]
+   (map #(Integer/parseInt %) (map str (str (* a b)))))
+
  9 99)
+
